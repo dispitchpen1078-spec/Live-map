@@ -1,0 +1,410 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/examples/animator-dashboard.html b/examples/animator-dashboard.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..e50b90d4d2943d95a6070742acb066d3bd03ca93
+--- /dev/null
++++ b/examples/animator-dashboard.html
+@@ -0,0 +1,400 @@
++<!DOCTYPE html>
++<html lang="ru">
++  <head>
++    <meta charset="UTF-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <title>Живая карта санатория — пример админки аниматоров</title>
++    <style>
++      :root {
++        color-scheme: light;
++        --bg: #f5f7f9;
++        --panel: #ffffff;
++        --accent: #4f7e4a;
++        --accent-soft: #e1f0d6;
++        --warning: #f5b942;
++        --danger: #ff7a7a;
++        --text: #1e2a30;
++        --muted: #6b7a86;
++        --border: #dce3ea;
++        --shadow: 0 20px 40px rgba(17, 38, 61, 0.12);
++      }
++
++      * {
++        box-sizing: border-box;
++      }
++
++      body {
++        margin: 0;
++        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
++        background: var(--bg);
++        color: var(--text);
++      }
++
++      header {
++        background: var(--panel);
++        border-bottom: 1px solid var(--border);
++        padding: 20px 32px;
++        display: flex;
++        justify-content: space-between;
++        align-items: center;
++      }
++
++      header h1 {
++        margin: 0;
++        font-size: 20px;
++      }
++
++      header .meta {
++        display: flex;
++        align-items: center;
++        gap: 16px;
++        color: var(--muted);
++        font-size: 14px;
++      }
++
++      main {
++        display: grid;
++        grid-template-columns: minmax(320px, 420px) minmax(580px, 1fr);
++        gap: 24px;
++        padding: 24px 32px 40px;
++      }
++
++      .panel {
++        background: var(--panel);
++        border-radius: 20px;
++        box-shadow: var(--shadow);
++        padding: 20px;
++        border: 1px solid var(--border);
++      }
++
++      .panel h2 {
++        margin-top: 0;
++        font-size: 18px;
++      }
++
++      .status-grid {
++        display: grid;
++        gap: 16px;
++      }
++
++      .status-card {
++        border: 1px solid var(--border);
++        border-radius: 16px;
++        padding: 16px;
++        display: grid;
++        gap: 8px;
++      }
++
++      .status-card header {
++        padding: 0;
++        border: none;
++        background: none;
++        display: flex;
++        justify-content: space-between;
++        align-items: center;
++      }
++
++      .badge {
++        padding: 4px 10px;
++        border-radius: 999px;
++        font-size: 12px;
++        font-weight: 600;
++      }
++
++      .badge.open {
++        background: var(--accent-soft);
++        color: var(--accent);
++      }
++
++      .badge.setup {
++        background: #f2e8ff;
++        color: #7a4ad6;
++      }
++
++      .badge.busy {
++        background: #ffe7d6;
++        color: #c26217;
++      }
++
++      .status-card .meta {
++        color: var(--muted);
++        font-size: 13px;
++        display: flex;
++        gap: 12px;
++        flex-wrap: wrap;
++      }
++
++      .alerts {
++        display: grid;
++        gap: 12px;
++      }
++
++      .alert {
++        padding: 14px;
++        border-radius: 14px;
++        border: 1px solid var(--border);
++        background: #fdfdfd;
++      }
++
++      .alert.info {
++        border-left: 5px solid var(--accent);
++      }
++
++      .alert.warning {
++        border-left: 5px solid var(--warning);
++      }
++
++      .map-panel {
++        display: grid;
++        gap: 16px;
++      }
++
++      .map-wrapper {
++        position: relative;
++        border-radius: 20px;
++        overflow: hidden;
++        border: 1px solid var(--border);
++      }
++
++      .map-wrapper img {
++        display: block;
++        width: 100%;
++        height: auto;
++      }
++
++      .pin {
++        position: absolute;
++        transform: translate(-50%, -100%);
++        background: var(--panel);
++        border: 1px solid var(--border);
++        padding: 8px 12px;
++        border-radius: 12px;
++        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
++        min-width: 140px;
++        font-size: 12px;
++      }
++
++      .pin strong {
++        display: block;
++        margin-bottom: 4px;
++      }
++
++      .pin .dot {
++        width: 12px;
++        height: 12px;
++        border-radius: 50%;
++        display: inline-block;
++        margin-right: 6px;
++        vertical-align: middle;
++      }
++
++      .pin .dot.open {
++        background: var(--accent);
++      }
++
++      .pin .dot.setup {
++        background: #7a4ad6;
++      }
++
++      .pin .dot.busy {
++        background: #c26217;
++      }
++
++      .map-actions {
++        display: flex;
++        gap: 12px;
++        flex-wrap: wrap;
++      }
++
++      .action {
++        border-radius: 12px;
++        border: 1px solid var(--border);
++        padding: 10px 14px;
++        background: #fff;
++        font-size: 13px;
++        color: var(--text);
++      }
++
++      .action strong {
++        display: block;
++        font-size: 14px;
++      }
++
++      footer {
++        padding: 16px 32px 32px;
++        color: var(--muted);
++        font-size: 13px;
++      }
++
++      @media (max-width: 960px) {
++        main {
++          grid-template-columns: 1fr;
++        }
++      }
++    </style>
++  </head>
++  <body>
++    <header>
++      <h1>Живая карта санатория — панель аниматоров</h1>
++      <div class="meta">
++        <span>Смена: 10:00–22:00</span>
++        <span>Дежурный менеджер: Екатерина</span>
++      </div>
++    </header>
++
++    <main>
++      <section class="panel">
++        <h2>Активности по зонам</h2>
++        <div class="status-grid" id="status-grid"></div>
++      </section>
++
++      <section class="panel map-panel">
++        <div>
++          <h2>Карта с активностями</h2>
++          <p style="margin: 6px 0 0; color: var(--muted);">
++            Подсветка по статусу зоны + быстрые подсказки для аниматоров.
++          </p>
++        </div>
++        <div class="map-wrapper">
++          <img src="assets/sanatorium-map.svg" alt="Схема санатория" />
++          <div class="pin" style="left: 78%; top: 73%;" data-zone="pool">
++            <strong><span class="dot open"></span>Бассейн</strong>
++            Аквааэробика • 11:00
++          </div>
++          <div class="pin" style="left: 62%; top: 28%;" data-zone="main-stage">
++            <strong><span class="dot setup"></span>Главная сцена</strong>
++            Саундчек • 16:30
++          </div>
++          <div class="pin" style="left: 32%; top: 70%;" data-zone="kids-club">
++            <strong><span class="dot open"></span>Детский клуб</strong>
++            Роспись фигурок • 12:15
++          </div>
++          <div class="pin" style="left: 83%; top: 25%;" data-zone="sports">
++            <strong><span class="dot busy"></span>Спорт</strong>
++            Мини-футбол • 10:30
++          </div>
++        </div>
++        <div class="map-actions">
++          <div class="action">
++            <strong>Быстрые задачи</strong>
++            Вызвать аниматора • Запросить реквизит
++          </div>
++          <div class="action">
++            <strong>Сценарии</strong>
++            План дождя • Вечерние активности
++          </div>
++          <div class="action">
++            <strong>Видимость</strong>
++            Детские зоны • Активные турниры
++          </div>
++        </div>
++      </section>
++
++      <section class="panel">
++        <h2>Оповещения смены</h2>
++        <div class="alerts" id="alerts"></div>
++      </section>
++    </main>
++
++    <footer>
++      Пример для обсуждения: можно подключить реальные координаты объектов, расписание,
++      уведомления и роли аниматоров.
++    </footer>
++
++    <script>
++      const data = {
++        zones: [
++          {
++            id: "pool",
++            name: "Бассейн",
++            status: "open",
++            capacity: 60,
++            currentGuests: 38,
++            tags: ["дети", "взрослые"],
++            nextEvent: "Аквааэробика",
++            startsAt: "11:00",
++            animator: "Ольга",
++          },
++          {
++            id: "main-stage",
++            name: "Главная сцена",
++            status: "setup",
++            capacity: 250,
++            currentGuests: 0,
++            tags: ["шоу", "музыка"],
++            nextEvent: "Вечерний концерт",
++            startsAt: "19:30",
++            animator: "Дмитрий",
++          },
++          {
++            id: "kids-club",
++            name: "Детский клуб",
++            status: "open",
++            capacity: 30,
++            currentGuests: 18,
++            tags: ["мастер-класс"],
++            nextEvent: "Роспись фигурок",
++            startsAt: "12:15",
++            animator: "Ирина",
++          },
++          {
++            id: "sports",
++            name: "Спортивная зона",
++            status: "busy",
++            capacity: 80,
++            currentGuests: 76,
++            tags: ["турнир"],
++            nextEvent: "Мини-футбол",
++            startsAt: "10:30",
++            animator: "Артем",
++          },
++        ],
++        alerts: [
++          {
++            id: "alert-1",
++            type: "info",
++            title: "Дополнительные коврики",
++            message: "Попросили принести коврики к йоге у озера.",
++          },
++          {
++            id: "alert-2",
++            type: "warning",
++            title: "Сильный ветер",
++            message: "Проверьте крепления на главной сцене.",
++          },
++        ],
++      };
++
++      const statusGrid = document.querySelector("#status-grid");
++      data.zones.forEach((zone) => {
++        const card = document.createElement("article");
++        card.className = "status-card";
++        card.innerHTML = `
++          <header>
++            <div>
++              <strong>${zone.name}</strong>
++              <div class="meta">Аниматор: ${zone.animator}</div>
++            </div>
++            <span class="badge ${zone.status}">
++              ${zone.status === "open" ? "Открыта" : zone.status === "setup" ? "Подготовка" : "Занято"}
++            </span>
++          </header>
++          <div class="meta">
++            <span>Гостей: ${zone.currentGuests}/${zone.capacity}</span>
++            <span>Ближайшее: ${zone.nextEvent} • ${zone.startsAt}</span>
++            <span>Теги: ${zone.tags.join(", ")}</span>
++          </div>
++        `;
++        statusGrid.appendChild(card);
++      });
++
++      const alertsList = document.querySelector("#alerts");
++      data.alerts.forEach((alert) => {
++        const block = document.createElement("div");
++        block.className = `alert ${alert.type}`;
++        block.innerHTML = `<strong>${alert.title}</strong><p style="margin: 6px 0 0;">${alert.message}</p>`;
++        alertsList.appendChild(block);
++      });
++    </script>
++  </body>
++</html>
+ 
+EOF
+)
