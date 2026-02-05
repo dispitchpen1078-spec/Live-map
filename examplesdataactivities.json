@@ -1,0 +1,73 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/examples/data/activities.json b/examples/data/activities.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..fff947a7a7957ef5302db4c0804ad6cd5cf72cae
+--- /dev/null
++++ b/examples/data/activities.json
+@@ -0,0 +1,63 @@
++{
++  "lastUpdated": "2024-04-18T09:30:00+03:00",
++  "zones": [
++    {
++      "id": "pool",
++      "name": "Бассейн",
++      "status": "open",
++      "capacity": 60,
++      "currentGuests": 38,
++      "tags": ["дети", "взрослые"],
++      "nextEvent": "Аквааэробика",
++      "startsAt": "11:00",
++      "animator": "Ольга"
++    },
++    {
++      "id": "main-stage",
++      "name": "Главная сцена",
++      "status": "setup",
++      "capacity": 250,
++      "currentGuests": 0,
++      "tags": ["шоу", "музыка"],
++      "nextEvent": "Вечерний концерт",
++      "startsAt": "19:30",
++      "animator": "Дмитрий"
++    },
++    {
++      "id": "kids-club",
++      "name": "Детский клуб",
++      "status": "open",
++      "capacity": 30,
++      "currentGuests": 18,
++      "tags": ["мастер-класс"],
++      "nextEvent": "Роспись фигурок",
++      "startsAt": "12:15",
++      "animator": "Ирина"
++    },
++    {
++      "id": "sports",
++      "name": "Спортивная зона",
++      "status": "busy",
++      "capacity": 80,
++      "currentGuests": 76,
++      "tags": ["турнир"],
++      "nextEvent": "Мини-футбол",
++      "startsAt": "10:30",
++      "animator": "Артем"
++    }
++  ],
++  "alerts": [
++    {
++      "id": "alert-1",
++      "type": "info",
++      "title": "Дополнительные коврики",
++      "message": "Попросили принести коврики к йоге у озера."
++    },
++    {
++      "id": "alert-2",
++      "type": "warning",
++      "title": "Сильный ветер",
++      "message": "Проверьте крепления на главной сцене."
++    }
++  ]
++}
+ 
+EOF
+)
